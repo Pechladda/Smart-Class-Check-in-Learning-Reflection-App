@@ -17,7 +17,7 @@ This project is developed for a university midterm submission.
 - After-class reflection:
 	- What did you learn today
 	- Feedback about the class
-- Data persistence (current implementation uses local storage; target architecture uses Firebase Firestore)
+- Data persistence using Firebase Firestore for storing all check-in and learning reflection records.
 
 ## 3. App Screens
 
