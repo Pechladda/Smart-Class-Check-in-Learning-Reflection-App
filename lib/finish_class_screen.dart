@@ -15,16 +15,19 @@ class _FinishClassScreenState extends State<FinishClassScreen> {
   final _learnedTodayController = TextEditingController();
   final _feedbackController = TextEditingController();
   final _storageService = LocalStorageService();
+  final MobileScannerController _scannerController = MobileScannerController();
 
   double? _latitude;
   double? _longitude;
   String? _qrCode;
   bool _isSaving = false;
+  bool _hasScanned = false;
 
   @override
   void dispose() {
     _learnedTodayController.dispose();
     _feedbackController.dispose();
+    _scannerController.dispose();
     super.dispose();
   }
 
@@ -183,12 +186,18 @@ class _FinishClassScreenState extends State<FinishClassScreen> {
                     child: SizedBox(
                       height: 220,
                       child: MobileScanner(
-                        onDetect: (capture) {
+                        controller: _scannerController,
+                        onDetect: (capture) async {
+                          if (_hasScanned) {
+                            return;
+                          }
                           final code = capture.barcodes.first.rawValue;
                           if (code != null && code.isNotEmpty) {
                             setState(() {
                               _qrCode = code;
+                              _hasScanned = true;
                             });
+                            await _scannerController.stop();
                           }
                         },
                       ),
@@ -203,6 +212,7 @@ class _FinishClassScreenState extends State<FinishClassScreen> {
                       border: Border.all(color: const Color(0xFFE8E8E8)),
                     ),
                     child: Text(
+                      'Scan status: ${_hasScanned ? 'Complete' : 'Waiting for scan'}\n'
                       'Scanned result: ${_qrCode ?? '-'}',
                       style: const TextStyle(color: Color(0xFF454545)),
                     ),

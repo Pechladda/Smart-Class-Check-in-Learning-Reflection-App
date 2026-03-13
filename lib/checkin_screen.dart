@@ -284,6 +284,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
                       border: Border.all(color: const Color(0xFFE8E8E8)),
                     ),
                     child: Text(
+                      'Scan status: ${_hasScanned ? 'Complete' : 'Waiting for scan'}\n'
                       'Scanned result: ${scannedResult ?? '-'}',
                       style: const TextStyle(color: Color(0xFF454545)),
                     ),
