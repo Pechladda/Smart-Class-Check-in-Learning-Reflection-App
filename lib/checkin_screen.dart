@@ -15,17 +15,20 @@ class _CheckinScreenState extends State<CheckinScreen> {
   final _previousTopicController = TextEditingController();
   final _expectedTopicController = TextEditingController();
   final _storageService = LocalStorageService();
+  final MobileScannerController _scannerController = MobileScannerController();
 
   double? _latitude;
   double? _longitude;
-  String? _qrCode;
+  String? scannedResult;
   int _mood = 3;
   bool _isSaving = false;
+  bool _hasScanned = false;
 
   @override
   void dispose() {
     _previousTopicController.dispose();
     _expectedTopicController.dispose();
+    _scannerController.dispose();
     super.dispose();
   }
 
@@ -62,7 +65,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
       _showMessage('Please get GPS location first.');
       return;
     }
-    if ((_qrCode ?? '').isEmpty) {
+    if ((scannedResult ?? '').isEmpty) {
       _showMessage('Please scan QR code first.');
       return;
     }
@@ -255,12 +258,18 @@ class _CheckinScreenState extends State<CheckinScreen> {
                     child: SizedBox(
                       height: 220,
                       child: MobileScanner(
-                        onDetect: (capture) {
+                        controller: _scannerController,
+                        onDetect: (capture) async {
+                          if (_hasScanned) {
+                            return;
+                          }
                           final code = capture.barcodes.first.rawValue;
                           if (code != null && code.isNotEmpty) {
                             setState(() {
-                              _qrCode = code;
+                              scannedResult = code;
+                              _hasScanned = true;
                             });
+                            await _scannerController.stop();
                           }
                         },
                       ),
@@ -275,7 +284,7 @@ class _CheckinScreenState extends State<CheckinScreen> {
                       border: Border.all(color: const Color(0xFFE8E8E8)),
                     ),
                     child: Text(
-                      'Scanned result: ${_qrCode ?? '-'}',
+                      'Scanned result: ${scannedResult ?? '-'}',
                       style: const TextStyle(color: Color(0xFF454545)),
                     ),
                   ),
